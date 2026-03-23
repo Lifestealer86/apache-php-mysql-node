@@ -69,7 +69,18 @@ RUN if [ "${ANGULAR}" = "true" ]; then npm install -g @angular/cli && \
 # Clear cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
+# Copy scripts/config into the image as a fallback.
+# (docker-compose bind-mounts them, but on some setups the mount can fail)
+COPY start.sh /usr/local/bin/start.sh
+COPY sshd_config /etc/ssh/sshd_config
+
+# If these files were created on Windows, they may contain CRLF (`\r\n`).
+# Docker bind-mount preserves bytes, and CRLF in the shebang breaks execution.
+RUN tmp="$(mktemp)" && tr -d '\r' < /usr/local/bin/start.sh > "$tmp" && mv "$tmp" /usr/local/bin/start.sh && \
+    tmp="$(mktemp)" && tr -d '\r' < /etc/ssh/sshd_config > "$tmp" && mv "$tmp" /etc/ssh/sshd_config
+
 #Apache configure
 RUN a2enmod rewrite
 
-ENTRYPOINT chmod 777 /root/start.sh && /root/start.sh
+# Normalize (in case bind-mount reintroduced CRLF), make executable, then run.
+ENTRYPOINT ["/bin/sh", "-c", "tmp=\"$(mktemp)\"; tr -d '\r' < /usr/local/bin/start.sh > \"$tmp\" && cp \"$tmp\" /usr/local/bin/start.sh && rm -f \"$tmp\"; tmp=\"$(mktemp)\"; tr -d '\r' < /etc/ssh/sshd_config > \"$tmp\" && cp \"$tmp\" /etc/ssh/sshd_config 2>/dev/null && rm -f \"$tmp\" || true; chmod 777 /usr/local/bin/start.sh; exec /usr/local/bin/start.sh"]

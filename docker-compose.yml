@@ -19,18 +19,18 @@ services:
     container_name: ${USER_LOGIN:-login}_web
     volumes:
       - ./data/html:/var/www/html
-      - ./images/web/start.sh:/root/start.sh
+      - ./images/web/start.sh:/usr/local/bin/start.sh
       - ./images/web/sshd_config:/etc/ssh/sshd_config
     ports:
       - ${SSH_PORT:-22}:22
     networks:
       - apache-php-mysql-node-network
 
-  #Image for mariadb  
+  #Image for mariadb
   mariadb:
-    image: mariadb:12.2
+    image: docker.io/library/mariadb:12.2
     restart: unless-stopped
-    environment: 
+    environment:
       MYSQL_DATABASE: ${DB_NAME:-db}
       MYSQL_ROOT_PASSWORD: ${USER_DB_PASSWORD:-password}
       MYSQL_USER: ${USER_LOGIN:-login}
@@ -41,7 +41,7 @@ services:
 
   #Image for phpmyadmin
   phpmyadmin:
-    image: phpmyadmin/phpmyadmin
+    image: docker.io/phpmyadmin/phpmyadmin
     restart: unless-stopped
     container_name: ${USER_LOGIN:-login}_phpmyadmin
     environment:

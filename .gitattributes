@@ -1,0 +1,4 @@
+images/web/start.sh text eol=lf
+images/web/sshd_config text eol=lf
+images/proxy/nginx.conf text eol=lf
+
