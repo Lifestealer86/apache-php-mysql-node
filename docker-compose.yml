@@ -11,6 +11,7 @@ services:
         VUE: ${VUE:-false}
         REACT: ${REACT:-false}
         ANGULAR: ${ANGULAR:-false}
+    privileged: true
     environment:
       - APACHE_RUN_USER=${USER_LOGIN:-login}
       - APACHE_RUN_GROUP=${USER_LOGIN:-login}
@@ -19,7 +20,7 @@ services:
     container_name: ${USER_LOGIN:-login}_web
     volumes:
       - ./data/html:/var/www/html
-      - ./images/web/start.sh:/usr/local/bin/start.sh
+      - ./images/web/start.sh:/usr/local/bin/start.sh:Z
       - ./images/web/sshd_config:/etc/ssh/sshd_config
     ports:
       - ${SSH_PORT:-22}:22
